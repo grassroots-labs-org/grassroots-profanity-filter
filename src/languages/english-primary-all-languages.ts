@@ -5392,7 +5392,10 @@ const _d: Record<string, number> = {
   "goyim": 832,
   "goyim know": 832,
   "goyimknow": 832,
-  "shut it down": 832,
+  // "shut it down" intentionally NOT listed standalone — it is an extremely
+  // common English idiom (operations, parenting, sports, events). The
+  // antisemitic compound forms ("oy vey shut it down", "goyim know shut it
+  // down") are caught via the entries below and the abhorrentWords Set.
   "oy vey shut it down": 832,
   // ===== BATCH 37: MORE MISC PROFANITY =====
   "anal bead": 832,

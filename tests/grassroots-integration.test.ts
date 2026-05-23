@@ -286,6 +286,52 @@ Wanted to experiment with a debate night as a format for a rationalist/EA/etc me
     });
   });
 
+  describe('Innocent idiom: "shut it down"', () => {
+    // The phrase "shut it down" exists as an antisemitic dog-whistle in only
+    // its compound forms ("goyim know shut it down", "oy vey shut it down").
+    // On its own it is an extremely common English idiom (operations, parties,
+    // parenting, sports, business). It must NOT be flagged in neutral context.
+    it('should NOT flag standalone "shut it down"', () => {
+      const result = containsAbhorrentLanguage(fields('shut it down'));
+      if (result) {
+        expect(result.hasProfane).toBe(false);
+        expect(result.profaneWords).toHaveLength(0);
+      }
+    });
+
+    it('should NOT flag "shut it down" in operations context', () => {
+      const result = containsAbhorrentLanguage(fields(
+        'The server is overloaded — please shut it down for the night and restart in the morning.'
+      ));
+      if (result) {
+        expect(result.hasProfane).toBe(false);
+        expect(result.profaneWords).toHaveLength(0);
+      }
+    });
+
+    it('should NOT flag "shut it down" in event-wrap-up context', () => {
+      const result = containsAbhorrentLanguage(fields(
+        'The block party runs until 10pm, after which we shut it down so the neighbors can sleep.'
+      ));
+      if (result) {
+        expect(result.hasProfane).toBe(false);
+        expect(result.profaneWords).toHaveLength(0);
+      }
+    });
+
+    it('should STILL flag the antisemitic compound "goyim know shut it down"', () => {
+      const result = containsAbhorrentLanguage(fields('goyim know shut it down'));
+      expect(result).not.toBeNull();
+      expect(result!.hasProfane).toBe(true);
+    });
+
+    it('should STILL flag the antisemitic compound "oy vey shut it down"', () => {
+      const result = containsAbhorrentLanguage(fields('oy vey shut it down'));
+      expect(result).not.toBeNull();
+      expect(result!.hasProfane).toBe(true);
+    });
+  });
+
   describe('Tech conferences and virtual events', () => {
     it('should NOT flag Women in Blockchain virtual event with Indian names', () => {
       const result = containsAbhorrentLanguage(fields(
