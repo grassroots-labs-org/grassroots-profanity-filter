@@ -1083,5 +1083,19 @@ describe("Event Description Profanity Filter Tests", () => {
         expect(filter.check(description)).toBe(false);
       });
     });
+
+    // Regression: the everyday noun "knob" (door knob, control knob) must not
+    // be flagged. Severity lowered to s:1 so the common sense doesn't trip the
+    // flag threshold.
+    describe('"knob" as an everyday noun should NOT be flagged', () => {
+      test.each([
+        ["Antique restoration workshop: learn to polish brass door knobs and hinges."],
+        ["Turn the knob clockwise to adjust the volume during the sound check."],
+        ["We're auctioning a vintage stove with original chrome knobs."],
+        ["Replace the cabinet knob and the drawer will look brand new."],
+      ])("should NOT flag: %s", (description) => {
+        expect(filter.check(description)).toBe(false);
+      });
+    });
   });
 });

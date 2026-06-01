@@ -2353,7 +2353,7 @@ const _d: Record<string, number> = {
   "healslut": 832, // gaming sexual slur
   "hell": 544, // mild expletive, very common innocent usage
   "hori": 832, // anti-Polynesian slur (NZ)
-  "knob": 784, // dual-meaning: door knob
+  "knob": 272, // s:1 c:1 — dual-meaning (door knob); severity lowered so the everyday sense doesn't flag
   "lusty": 816, // can be sexual, common innocent usage
   "missionary": 832, // sexual position, also religious term
   "moan": 784, // s:3 c:1 — innocent by default; only the +3 sexual-context boosters re-flag (see WORD_SPECIFIC_PATTERNS)
