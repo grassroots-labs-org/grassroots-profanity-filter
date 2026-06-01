@@ -215,6 +215,35 @@ export const LANGUAGE_SPECIFIC_PATTERNS: Record<
  * Word-specific context patterns for disambiguating ambiguous profane words.
  * Keyed by the lowercase profane word.
  */
+/**
+ * Sexual-context boosters shared by ambiguous "sound" words (groan, moan)
+ * that are innocent in everyday usage but profane in sexual contexts.
+ * Each pattern raises certainty so the word crosses the flag threshold only
+ * when an unambiguously sexual cue sits next to it.
+ */
+const SEXUAL_SOUND_BOOSTERS: UniversalContextPattern[] = [
+  {
+    type: "sexual_verb_before",
+    pattern:
+      /\b(pleasure|pleasures|ecstasy|orgasm|orgasmic|climax|aroused|arousal|horny|erotic|sensual|seductive|sexual|sexy|naked|nude|bedroom|in bed|between the sheets|foreplay|nipple|breast|thrust)\b.{0,20}PROFANE_WORD/i,
+    weight: 2.0,
+    delta: 3,
+    languages: ["*"],
+    description: "Sexual cue before sound word — confirms sexual intent",
+    examples: ["moans of pleasure", "orgasmic moan", "erotic groan"],
+  },
+  {
+    type: "sexual_verb_after",
+    pattern:
+      /PROFANE_WORD.{0,20}\b(of pleasure|in pleasure|with pleasure|of ecstasy|in ecstasy|orgasm|orgasmic|climax|aroused|arousal|sexually|erotic|sensual|in bed|between the sheets|foreplay)\b/i,
+    weight: 2.0,
+    delta: 3,
+    languages: ["*"],
+    description: "Sexual cue after sound word — confirms sexual intent",
+    examples: ["moan of pleasure", "groan in ecstasy"],
+  },
+];
+
 export const WORD_SPECIFIC_PATTERNS: Record<
   string,
   UniversalContextPattern[]
@@ -303,6 +332,12 @@ export const WORD_SPECIFIC_PATTERNS: Record<
       examples: ["Dick Cheney", "Dick Van Dyke"],
     },
   ],
+  // "groan"/"moan" are innocent by default (s:3 c:2, below the flag threshold).
+  // These boosters re-flag them only in clearly sexual contexts, so ordinary
+  // copy ("you'll groan at the dad jokes", "don't moan about the weather")
+  // passes while sexual usage is still caught.
+  groan: SEXUAL_SOUND_BOOSTERS,
+  moan: SEXUAL_SOUND_BOOSTERS,
 };
 
 /**

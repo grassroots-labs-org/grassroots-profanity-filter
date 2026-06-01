@@ -1068,5 +1068,20 @@ describe("Event Description Profanity Filter Tests", () => {
         expect(filter.check(description)).toBe(false);
       });
     });
+
+    // Regression: the everyday English noun "item" must not be flagged.
+    // It was previously listed as Hindi slang ("item" = objectifying term for
+    // women), causing false positives on ordinary copy like "handmade item".
+    describe('"item" as an everyday English noun should NOT be flagged', () => {
+      test.each([
+        ["Whether you bid on a vacation, artwork, gift basket, experience, or handmade item, you are helping rescued animals."],
+        ["Each item in the silent auction supports our medical barn fund."],
+        ["Please bring one item to donate to the clothing drive."],
+        ["This item is available for pickup at the front desk."],
+        ["Add the item to your cart and proceed to checkout."],
+      ])("should NOT flag: %s", (description) => {
+        expect(filter.check(description)).toBe(false);
+      });
+    });
   });
 });
