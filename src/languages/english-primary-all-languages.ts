@@ -2349,14 +2349,14 @@ const _d: Record<string, number> = {
   "damnation": 560, // religious curse
   "ejaculate": 1072, // medical/sexual term
   "enshittification": 848, // degradation of platforms
-  "groan": 816, // can be sexual, common innocent usage
+  "groan": 784, // s:3 c:1 — innocent by default; only the +3 sexual-context boosters re-flag (see WORD_SPECIFIC_PATTERNS)
   "healslut": 832, // gaming sexual slur
   "hell": 544, // mild expletive, very common innocent usage
   "hori": 832, // anti-Polynesian slur (NZ)
-  "knob": 784, // dual-meaning: door knob
+  "knob": 272, // s:1 c:1 — dual-meaning (door knob); severity lowered so the everyday sense doesn't flag
   "lusty": 816, // can be sexual, common innocent usage
   "missionary": 832, // sexual position, also religious term
-  "moan": 816, // can be sexual, common innocent usage
+  "moan": 784, // s:3 c:1 — innocent by default; only the +3 sexual-context boosters re-flag (see WORD_SPECIFIC_PATTERNS)
   "poofs": 1344, // homophobic slur plural
   "poofters": 1344, // homophobic slur plural
   "shaft": 784, // dual-meaning: elevator shaft, engineering
@@ -15460,7 +15460,9 @@ const _d: Record<string, number> = {
   "khatey": 1092, // Testicles (regional slang)
   "pataka": 836, // Firecracker (sometimes used for attractive woman, can be objectifying/vulgar)
   "maal": 836, // Goods/Stuff (objectifying term for women)
-  "item": 836, // Item (objectifying term for women)
+  // "item" removed: collides with the everyday English noun "item" (e.g. "handmade item"),
+  // causing false positives. Genuinely objectifying uses remain covered by multi-word Tamil
+  // entries (e.g. "item koothi") and the Devanagari "आइटम".
   "topibaaz": 836, // Deceiver, trickster (lit. hat-wearer)
   "dhongi": 836, // Hypocrite, imposter
   "pakhandi": 836, // Hypocrite

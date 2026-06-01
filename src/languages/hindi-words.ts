@@ -445,7 +445,9 @@ const _d: Record<string, [number, number]> = {
   "khatey": [4, 4], // Testicles (regional slang)
   "pataka": [1, 2], // Firecracker (sometimes used for attractive woman, can be objectifying/vulgar)
   "maal": [1, 2], // Goods/Stuff (objectifying term for women)
-  "item": [1, 2], // Item (objectifying term for women)
+  // "item" removed: collides with the everyday English noun "item" (e.g. "handmade item"),
+  // causing false positives. Genuinely objectifying uses remain covered by multi-word Tamil
+  // entries (e.g. "item koothi") and the Devanagari "आइटम".
   "topibaaz": [3, 4], // Deceiver, trickster (lit. hat-wearer)
   "dhongi": [3, 4], // Hypocrite, imposter
   "pakhandi": [3, 4], // Hypocrite
