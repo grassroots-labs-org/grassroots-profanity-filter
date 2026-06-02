@@ -338,6 +338,13 @@ export const WORD_SPECIFIC_PATTERNS: Record<
   // passes while sexual usage is still caught.
   groan: SEXUAL_SOUND_BOOSTERS,
   moan: SEXUAL_SOUND_BOOSTERS,
+  // Dual-use words: innocent by default (s:3 c:1), re-escalated to PROFANE only
+  // when a sexual cue is adjacent — so "elevator shaft" / "shag carpet" /
+  // "snatch the weight" / "slag heap" stay clean.
+  shaft: SEXUAL_SOUND_BOOSTERS,
+  shag: SEXUAL_SOUND_BOOSTERS,
+  snatch: SEXUAL_SOUND_BOOSTERS,
+  slag: SEXUAL_SOUND_BOOSTERS,
 };
 
 /**

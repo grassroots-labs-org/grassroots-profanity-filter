@@ -534,7 +534,7 @@ const _d: Record<string, number> = {
   "bonesmashing": 848, // incel: hitting face to reshape bones
   "ropemaxx": 1360, // incel: suicide by hanging
   "ropemaxxing": 1360, // incel: suicide by hanging
-  "roped": 1056, // incel: committed suicide (also innocent uses)
+  "roped": 784, // s:3 c:1 — innocent by default ("roped off", "roped in"); below the PROFANE threshold
   "heightmax": 576, // incel culture term
   "heightmaxxing": 592, // incel culture term
   "statusmax": 576, // incel culture term
@@ -2260,7 +2260,7 @@ const _d: Record<string, number> = {
   "cope": 560, // dismissive internet term
   "seethe": 560, // dismissive internet term
   "copium": 560, // internet mocking
-  "dilate": 1296, // dual-meaning: medical term
+  "dilate": 784, // s:3 c:1 — medical/everyday term; lowered from s:5 so it doesn't auto-classify as PROFANE
   "an hero": 1360, // suicide reference meme
   "anhero": 1360, // suicide reference compound
   "rope yourself": 1360, // suicide reference
@@ -2354,7 +2354,7 @@ const _d: Record<string, number> = {
   "hell": 544, // mild expletive, very common innocent usage
   "hori": 832, // anti-Polynesian slur (NZ)
   "knob": 272, // s:1 c:1 — dual-meaning (door knob); severity lowered so the everyday sense doesn't flag
-  "lusty": 816, // can be sexual, common innocent usage
+  "lusty": 816, // s:3 c:3 — kept flagging; the innocent "hearty" sense is rare/archaic
   "missionary": 832, // sexual position, also religious term
   "moan": 784, // s:3 c:1 — innocent by default; only the +3 sexual-context boosters re-flag (see WORD_SPECIFIC_PATTERNS)
   "poofs": 1344, // homophobic slur plural
