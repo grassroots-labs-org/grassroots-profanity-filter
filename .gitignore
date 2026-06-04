@@ -49,3 +49,6 @@ benchmark-results/
 # Demo files
 demo/
 src/demo.ts
+
+# claude / extensions
+.omc/
