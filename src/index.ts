@@ -9,6 +9,7 @@ import { ContextAnalyzer, ContextPatternMatcher } from "./algos/context-patterns
 // Cross-language innocence scoring
 import { detectLanguages, scoreWord } from "./language-detector.js";
 import innocentWords from "./languages/innocent-words.js";
+import defaultLeetInnocentWords from "./languages/leet-innocent-words.js";
 import { adjustCertaintyForLanguage } from "./innocence-scoring.js";
 
 // Export consolidated dictionary for direct access
@@ -207,6 +208,17 @@ export interface BeKindOptions {
    * @default true
    */
   enableLeetSpeak?: boolean;
+
+  /**
+   * Extra legitimate words to protect from leet-speak normalization, so that
+   * ambiguous letter→letter mappings (z→s, v→u, j→y, ph→f) can't mangle them
+   * into a dictionary profanity (e.g. "pizza" → "pissa"). Merged with the
+   * built-in list in {@link ./languages/leet-innocent-words}. Case-insensitive,
+   * matched whole-word.
+   *
+   * @example ['pizza', 'jazzercise']
+   */
+  leetInnocentWords?: string[];
 
   /**
    * Enable case-sensitive matching. When false, all matching is done in lowercase.
@@ -1003,6 +1015,8 @@ export class BeKind {
 
   private defaultPlaceholder: string = "*";
   private enableLeetSpeak: boolean = true;
+  /** Whole-word regex of legit words protected from leet normalization (or null if none). */
+  private leetInnocentRegex: RegExp | null = null;
   private caseSensitive: boolean = false;
   private strictMode: boolean = false;
   private detectPartialWords: boolean = false;
@@ -1483,6 +1497,7 @@ export class BeKind {
     }
 
     this.enableLeetSpeak = options?.enableLeetSpeak ?? true;
+    this.setLeetInnocentWords(options?.leetInnocentWords);
     this.caseSensitive = options?.caseSensitive ?? false;
     this.strictMode = options?.strictMode ?? false;
     this.detectPartialWords = options?.detectPartialWords ?? false;
@@ -1617,6 +1632,53 @@ export class BeKind {
    */
   private static readonly PURE_NUMERIC_TOKEN_RE = /(?:^|(?<=\s))([^a-z\s]*\d[^a-z\s]*)(?=\s|$)/gi;
 
+  /**
+   * Build the whole-word regex used to shield legitimate words from leet
+   * normalization. Merges the built-in list with any caller-supplied words.
+   */
+  private setLeetInnocentWords(extra?: string[]): void {
+    const words = new Set<string>(defaultLeetInnocentWords.map((w) => w.toLowerCase()));
+    for (const w of extra ?? []) {
+      const trimmed = w.trim().toLowerCase();
+      if (trimmed) words.add(trimmed);
+    }
+    if (words.size === 0) {
+      this.leetInnocentRegex = null;
+      return;
+    }
+    const alternation = Array.from(words)
+      .map((w) => this.escapeRegex(w))
+      .join("|");
+    // \b…\b keeps the guard whole-word so "pizza" is protected but a profane
+    // substring host (if any) still matches normally.
+    this.leetInnocentRegex = new RegExp(`\\b(?:${alternation})\\b`, "gi");
+  }
+
+  /**
+   * Replace protected leet-innocent words with inert placeholders so the
+   * subsequent leet-mapping passes cannot rewrite their letters. Mirrors the
+   * numeric-token protection used in the leet normalizers. Returns the guarded
+   * text plus the restore list.
+   */
+  private protectLeetInnocentWords(
+    text: string,
+    startIndex: number
+  ): { text: string; tokens: { placeholder: string; original: string }[] } {
+    const tokens: { placeholder: string; original: string }[] = [];
+    if (!this.leetInnocentRegex) return { text, tokens };
+    this.leetInnocentRegex.lastIndex = 0;
+    const guarded = text.replace(this.leetInnocentRegex, (match) => {
+      const n = startIndex + tokens.length;
+      const a = String.fromCharCode(65 + (n % 26));
+      const b = String.fromCharCode(65 + (Math.floor(n / 26) % 26));
+      // Uppercase + \x00 delimiters can never match the lowercase leet keys.
+      const placeholder = `\x00LW${a}${b}\x00`;
+      tokens.push({ placeholder, original: match });
+      return placeholder;
+    });
+    return { text: guarded, tokens };
+  }
+
   private normalizeLeetSpeak(text: string): string {
     if (!this.enableLeetSpeak) return text;
 
@@ -1633,6 +1695,11 @@ export class BeKind {
       numericTokens.push({ placeholder, original: match });
       return placeholder;
     });
+    // Protect legitimate words (e.g. "pizza") from being mangled into profanity
+    // by letter→letter mappings (z→s).
+    const { text: guarded, tokens: innocentTokens } =
+      this.protectLeetInnocentWords(normalized, numericTokens.length);
+    normalized = guarded;
     const sortedMappings = Array.from(this.leetMappings.entries()).sort(
       ([leetA], [leetB]) => leetB.length - leetA.length
     );
@@ -1640,8 +1707,8 @@ export class BeKind {
       const regex = new RegExp(this.escapeRegex(leet), "g");
       normalized = normalized.replace(regex, normal);
     }
-    // Restore numeric tokens
-    for (const { placeholder, original } of numericTokens) {
+    // Restore protected tokens
+    for (const { placeholder, original } of [...numericTokens, ...innocentTokens]) {
       normalized = normalized.replace(placeholder, original);
     }
     return normalized;
@@ -1667,6 +1734,11 @@ export class BeKind {
       numericTokens.push({ placeholder, original: match });
       return placeholder;
     });
+    // Protect legitimate words from letter-preserving symbol decoding too, so
+    // both leet variants stay consistent for protected tokens.
+    const { text: guarded, tokens: innocentTokens } =
+      this.protectLeetInnocentWords(normalized, numericTokens.length);
+    normalized = guarded;
     const sortedMappings = Array.from(this.leetMappings.entries()).sort(
       ([leetA], [leetB]) => leetB.length - leetA.length
     );
@@ -1675,8 +1747,8 @@ export class BeKind {
       const regex = new RegExp(this.escapeRegex(leet), "g");
       normalized = normalized.replace(regex, normal);
     }
-    // Restore numeric clusters
-    for (const { placeholder, original } of numericTokens) {
+    // Restore protected tokens
+    for (const { placeholder, original } of [...numericTokens, ...innocentTokens]) {
       normalized = normalized.replace(placeholder, original);
     }
     return normalized;
@@ -3463,6 +3535,9 @@ export class BeKind {
     }
     if (options.enableLeetSpeak !== undefined) {
       this.enableLeetSpeak = options.enableLeetSpeak;
+    }
+    if (options.leetInnocentWords !== undefined) {
+      this.setLeetInnocentWords(options.leetInnocentWords);
     }
     if (
       options.caseSensitive !== undefined &&
